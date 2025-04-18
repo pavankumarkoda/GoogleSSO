@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Google Sign-In Required</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #333;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .g_id_signin {
+      margin-bottom: 30px;
+    }
+
+    #main-content {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+    }
+
+    #main-content h1 {
+      margin-top: 0;
+      color: #0073e6;
+    }
+
+    #main-content p {
+      font-size: 16px;
+      color: #555;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background-color: #ff4d4f;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #d9363e;
+    }
+  </style>
+</head>
+<body>
+  <h2>Please sign in with your Google Account to continue</h2>
+
+  <div id="g_id_onload"
+       data-client_id="790137202397-t92oorsq0d4t8uq4tpv9hhldt3s0o2l7.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse"
+       data-auto_prompt="true">
+  </div>
+
+  <div class="g_id_signin"
+       data-type="standard"
+       data-size="large"
+       data-theme="outline">
+  </div>
+
+  <div id="main-content" style="display: none;">
+    <h1>Welcome!</h1>
+    <p>This is your protected content.</p>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    // On page load, check if user is already logged in
+    window.onload = function() {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        showContent(JSON.parse(userData));
+      }
+    };
+  
+    function handleCredentialResponse(response) {
+      const token = response.credential;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+  
+      if (payload.email && payload.email_verified && payload.email.endsWith("@gmail.com")) {
+        localStorage.setItem("user", JSON.stringify(payload));
+        showContent(payload);
+      } else {
+        alert("Only Gmail accounts are allowed.");
+      }
+    }
+  
+    function showContent(user) {
+      document.getElementById("main-content").style.display = "block";
+      document.querySelector(".g_id_signin").style.display = "none";
+      document.querySelector("h2").style.display = "none";
+
+      document.getElementById("main-content").innerHTML = `
+        <h1>Welcome, ${user.name}!</h1>
+        <p>Email: ${user.email}</p>
+        <button onclick="logout()">Logout</button>
+      `;
+    }
+  
+    function logout() {
+      localStorage.removeItem("user");
+      window.location.reload();
+    }
+  </script>
+</body>
+</html>
