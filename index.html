@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Google Sign-In Required</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  
+
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -48,6 +48,13 @@
       color: #555;
     }
 
+    #main-content img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-bottom: 15px;
+    }
+
     button {
       margin-top: 20px;
       padding: 10px 20px;
@@ -80,45 +87,45 @@
        data-theme="outline">
   </div>
 
-  <div id="main-content" style="display: none;">
-    <h1>Welcome!</h1>
-    <p>This is your protected content.</p>
-    <button onclick="logout()">Logout</button>
-  </div>
+  <div id="main-content" style="display: none;"></div>
 
   <script>
-    // On page load, check if user is already logged in
-    window.onload = function() {
+    window.onload = function () {
       const userData = localStorage.getItem("user");
       if (userData) {
         showContent(JSON.parse(userData));
       }
     };
-  
+
     function handleCredentialResponse(response) {
       const token = response.credential;
       const payload = JSON.parse(atob(token.split('.')[1]));
-  
-      if (payload.email && payload.email_verified && payload.email.endsWith("@gmail.com")) {
+
+      if (
+        payload.email &&
+        payload.email_verified &&
+        payload.email.endsWith("@gmail.com")
+      ) {
         localStorage.setItem("user", JSON.stringify(payload));
         showContent(payload);
       } else {
         alert("Only Gmail accounts are allowed.");
       }
     }
-  
+
     function showContent(user) {
       document.getElementById("main-content").style.display = "block";
       document.querySelector(".g_id_signin").style.display = "none";
       document.querySelector("h2").style.display = "none";
 
       document.getElementById("main-content").innerHTML = `
+        <img src="${user.picture}" alt="Profile Picture">
         <h1>Welcome, ${user.name}!</h1>
         <p>Email: ${user.email}</p>
         <button onclick="logout()">Logout</button>
       `;
     }
-  
+
     function logout() {
       localStorage.removeItem("user");
       window.location.reload();
